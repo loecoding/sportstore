@@ -20,8 +20,7 @@ export class Customer {
   @Prop()
   address: string;
 
-  // @Prop()
-  // priceProduct: number;
+
 
 }
 

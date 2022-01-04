@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Query } from '@nestjs/common';
 import { OrderService } from 'src/order/order.service';
 import { ProductService } from 'src/product/product.service';
 import { CustomerService } from './customer.service';
@@ -23,9 +23,9 @@ export class CustomerController {
   }
 
   @Get(':id')
-  searchCustomer(@Param('id') id: string) {
-    console.log(name)
-    return this.customerService.searchCustomer(id);
+  findCustomerById(@Param('id') id: string) {
+    console.log(id)
+    return this.customerService.findCustomerById(id);
   }
 
   @Put('/id/:id')
@@ -40,8 +40,16 @@ export class CustomerController {
     return this.customerService.deleteCustomer(id);
   }
   
-  @Post('/shopping/:id')
-  shopping(@Param('id') id: number ,@Body() productId: number){
-    
+  @Post('/shopping/:customerId/:productId/:quantity')
+  async shopping(@Param('customerId') customerId: string , @Param('productId') productId:string 
+  , @Param('quantity') quantity:number){
+    // console.log({customerId,productId})
+    return await this.orderService.getOrderByProductId(customerId,productId,quantity)
   }
+
+  @Post('/payment/:orderId/:pay')
+  async payment(@Param('orderId') orderId: string ,  @Param('pay')  pay: number ){
+    return await this.orderService.paymentMethod(orderId,pay)
+  }
+
 }

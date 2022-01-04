@@ -42,4 +42,16 @@ export class ProductService {
       )
   }
   
+  async findPriceByProductId(id: string): Promise<Product>{
+    const productDocument = await this.productModel
+    .findOne({id}).populate('price').exec()
+    if (!productDocument) {
+      return;
+    }
+    const product = productDocument.toObject();
+    const price = product.price;
+    // console.log(price)
+    return {...product , price}
+  }
+
 }

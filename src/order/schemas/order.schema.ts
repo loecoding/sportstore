@@ -2,17 +2,26 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
 export type OrderDocument = Order & Document;
-
-@Schema({timestamps: true})
+//{timestamps: true}
+@Schema()
 export class Order {
   @Prop()
   id: number;
 
   @Prop()
-  paymentID: string;
+  customerId : string
 
   @Prop()
-  timePayment: string;
+  productName: string;
+
+  @Prop()
+  productQuantity: number;
+
+  @Prop()
+  paymentID: number;
+
+  @Prop()
+  timePayment: Date;
   
   @Prop()
   deliveryType: string;
@@ -28,6 +37,9 @@ export class Order {
 
   @Prop()
   totalPrice: number;
+
+  @Prop()
+  priceOrder: number;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
