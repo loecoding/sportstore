@@ -1,5 +1,6 @@
+import { Types } from "mongoose";
+
 export class OrderEntity {
-    id: number;
     customerId : string;
     customerName : string;
     productName: string;
@@ -11,5 +12,5 @@ export class OrderEntity {
     deliveryAddress: string;
     status: string;
     totalPrice: number;
-    priceOrder: number;
+    totalPriceAndDelivery: number;
 }

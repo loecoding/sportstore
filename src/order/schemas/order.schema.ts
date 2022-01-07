@@ -5,11 +5,12 @@ export type OrderDocument = Order & Document;
 //{timestamps: true}
 @Schema()
 export class Order {
-  @Prop()
-  id: number;
 
   @Prop()
   customerId : string
+
+  @Prop()
+  customerName : string
 
   @Prop()
   productName: string;
@@ -18,7 +19,7 @@ export class Order {
   productQuantity: number;
 
   @Prop()
-  paymentID: number;
+  paymentId: string;
 
   @Prop()
   timePayment: Date;
@@ -27,7 +28,7 @@ export class Order {
   deliveryType: string;
 
   @Prop()
-  deliveryCost: string;
+  deliveryCost: number;
 
   @Prop()
   deliveryAddress: string;
@@ -39,7 +40,7 @@ export class Order {
   totalPrice: number;
 
   @Prop()
-  priceOrder: number;
+  totalPriceAndDelivery: number;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

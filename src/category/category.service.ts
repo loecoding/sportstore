@@ -1,25 +1,32 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { CustomerService } from 'src/customer/customer.service';
+import { ProductService } from 'src/product/product.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CategoryEntity } from './entities/category.entity';
 import { Category, CategoryDocument } from './schemas/category.schema';
 
 @Injectable()
 export class CategoryService {
-  constructor(@InjectModel(Category.name) private categoryModel : Model<CategoryDocument> ) { }
+  constructor(@InjectModel(Category.name) private categoryModel : Model<CategoryDocument> 
+  ,@Inject(forwardRef(() => CustomerService)) private readonly customerService: CustomerService
+  ,@Inject(forwardRef(() => ProductService)) private readonly productService: ProductService
+  ) { }
+  CategoryArray:CategoryEntity[] = []
 
-  async addProduct(createProductDto: CreateCategoryDto): Promise<Category> {
+  async addCategory(createProductDto: CreateCategoryDto): Promise<Category> {
     return new this.categoryModel(createProductDto).save()
   }
 
   async showCategory() {
-    return this.categoryModel.find()
+    return await this.categoryModel.find()
   }
 
-  async searchCategory(id: string) {
-    return this.categoryModel.findOne({id})
-  }
+  async searchCategory(id: string): Promise<Category> {
+    return this.categoryModel.findOne({_id: id})
+  } 
 
   async updateCategory(id: string, udateCategoryDto: UpdateCategoryDto) {
     return this.categoryModel.updateOne({id}, 
@@ -31,4 +38,5 @@ export class CategoryService {
     return this.categoryModel.deleteOne({id})
   }
 
+  
 }

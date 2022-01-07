@@ -28,13 +28,13 @@ export class CustomerController {
     return this.customerService.findCustomerById(id);
   }
 
-  @Put('/id/:id')
+  @Put(':id')
   updateCustomer(@Param('id') id: string, @Body() updateCustomerDto: UpdateCustomerDto) {
     console.log(id)
     return this.customerService.updateCustomer(id, updateCustomerDto);
   }
 
-  @Delete('/id/:id')
+  @Delete(':id')
   deleteCustomer(@Param('id') id: string) {
     console.log(id)
     return this.customerService.deleteCustomer(id);

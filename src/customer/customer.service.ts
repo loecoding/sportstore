@@ -23,28 +23,16 @@ export class CustomerService {
   }
 
   async findCustomerById(id: string): Promise<Customer>{
-    return this.customerModel.findOne({id})
+    return this.customerModel.findOne({_id: id})
   }
 
-  async updateCustomer(name: string, updateCustomerDto: UpdateCustomerDto) {
+  async updateCustomer(id: string, updateCustomerDto: UpdateCustomerDto) {
     return this.customerModel.updateOne(
-      {name}, {$set:{...updateCustomerDto}})
+      {_id: id}, {$set:{...updateCustomerDto}})
   }
 
-  async deleteCustomer(name: string) {
-    return this.customerModel.deleteOne({name})
+  async deleteCustomer(id: string) {
+    return this.customerModel.deleteOne({_id: id})
   }
-
-  // async shopping(customerId: string, productId: string ,quantity: number) {
-  //   // const getPriceByCustomer = this.customerModel.findOne({id})
-  //   // const getProductPriceById = await this.productService.getProductPriceById(productId)
-  //   // const getOrderById = await this.oderService.
-
-  //   // console.log(`customerId: ${getPriceByCustomer} buy productId: ${getProductPriceById.id} price: ${getProductPriceById.price}`)
-  //   // return `customerId: ${getPriceByCustomer} buy productId: ${getProductPriceById.id} price: ${getProductPriceById.price}`
-  //   return await this.oderService.getPriceByProductId(customerId,productId,quantity)
-
-  // }
-
 
 }

@@ -11,10 +11,10 @@ export class OrderController {
   constructor(private readonly orderService: OrderService , private customerService: CustomerService
     ,private productService: ProductService ) {}
 
-  @Post()
-  addOrder(@Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.addOrder(createOrderDto);
-  }
+  // @Post()
+  // addOrder(@Body() createOrderDto: CreateOrderDto) {
+  //   return this.orderService.addOrder(createOrderDto);
+  // }
 
   @Get()
   showOrder() {
@@ -27,24 +27,24 @@ export class OrderController {
     return this.orderService.findOrder(id);
   }
   
-  @Put('/id/:id')
+  @Put(':id')
   updateOrder(@Param('id') id: string, @Body() updateCatDto: UpdateOrderDto) {
     console.log(id)
     return this.orderService.updateOrder(id, updateCatDto);
   }
 
-  @Delete('/id/:id')
+  @Delete(':id')
   deleteOrder(@Param('id') id: string) {
     console.log(id)
     return this.orderService.deleteOrder(id);
   }
 
-  @Post('/id/:id')
+  @Post(':id')
   paymentMothod(@Param('id') id: string , @Body() price: number){
     console.log(price)
     
   }
-  @Post('/id/:id')
+  @Post(':id')
   paymentDetail(@Param('id') id: string){
     console.log(id)
     
