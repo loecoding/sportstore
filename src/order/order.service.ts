@@ -2,12 +2,13 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Order , OrderDocument } from './schemas/order.schema';
-import { CreateOrderDto } from './dto/create-order.dto';
+import { CreateOrderDto, OrderPayloadDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { CustomerService } from 'src/customer/customer.service';
 import { ProductService } from 'src/product/product.service';
 import { OrderEntity } from "./entities/order.entity"
 import { v4 as uuid } from 'uuid';
+import { Variant } from 'src/product/schemas/variant.schema';
 
 @Injectable()
 export class OrderService {
@@ -41,30 +42,77 @@ export class OrderService {
     const findAndPayment = await this.orderModel.findOneAndUpdate(
       {_id: orderId , totalPriceAndDelivery: pay } , {status:'paid' , timePayment: new Date() , deliveryType:'Kerry' ,
       paymentId: uuid() }).lean().exec()
-
+    
+    for(const lineItem of findAndPayment.line_items){
+      const check = await this.productService.decreaseVariantQuantity(lineItem.variantId , lineItem.quantity)
+      // console.log(check)
+    }
+      
     return findAndPayment
 }
 
-  async getOrderByProductId(customerId: string , productId : string , quantity: number){
-    const findCustomer = await this.customerService.findCustomerById(customerId)
-    const findProduct = await this.productService.getProductById(productId , quantity)
-   
-    let orderArray = new OrderEntity()
+async getTotalPrice(variant: Variant , payload : OrderPayloadDto) {
+  const lineItem = payload.line_items.find(item => item.variantId === variant._id.toString())
+  return variant.price * lineItem.quantity
+}
 
-    orderArray.customerId = customerId
-    orderArray.customerName = findCustomer.name
-    orderArray.productName = findProduct.name
-    orderArray.productQuantity = quantity
-    orderArray.paymentId = null
-    orderArray.timePayment = null
-    orderArray.deliveryType = null
-    orderArray.deliveryCost = 45
-    orderArray.deliveryAddress = findCustomer.address
-    orderArray.status = 'pending'
-    orderArray.totalPrice = findProduct.price * (quantity)
-    orderArray.totalPriceAndDelivery = orderArray.totalPrice + orderArray.deliveryCost
+  async getOrderByVariantId(customerId: string , payload : OrderPayloadDto){
+    const customer = await this.customerService.findCustomerById(customerId)
+    const variantProducts = await this.productService.findVariantByIds(payload.line_items.map(item => item.variantId
+    ))
 
-    return await new this.orderModel(orderArray).save()
+    let totalPrice = 0
+    for(const variant of variantProducts){
+      const price = await this.getTotalPrice(variant , payload)
+      totalPrice += price 
+    }
+
+    // let orderArray = new OrderEntity()
+
+    // orderArray.line_items = payload.line_items
+
+    // orderArray.customerId = customerId
+    // orderArray.customerName = customer.name
+    // // orderArray.productName = product.name
+    // // orderArray.productQuantity = quantity
+    // orderArray.paymentId = null
+    // orderArray.timePayment = null
+    // orderArray.deliveryType = null
+    // orderArray.deliveryCost = 45
+    // orderArray.deliveryAddress = customer.address
+    // orderArray.status = 'pending'
+    // orderArray.totalPrice = totalPrice
+    // orderArray.totalPriceAndDelivery = orderArray.totalPrice + orderArray.deliveryCost
+
+    // const order = new Order()
+    // order.line_items = payload.line_items
+    // order.customerId = customerId
+    // order.customerName = customer.name
+    // order.paymentId = null
+    // order.timePayment = null
+    // order.deliveryType = null
+    // order.deliveryCost = 45
+    // order.deliveryAddress = customer.address
+    // order.status = 'pending'
+    // order.totalPrice = totalPrice
+    // order.totalPriceAndDelivery = order.totalPrice + order.deliveryCost
+
+    const deliveryCost = 45
+    const order = new this.orderModel({
+      line_items: payload.line_items , 
+      customerId: customerId ,
+      customerName: customer.name ,
+      paymentId: null,
+      timePayment: null,
+      deliveryType: null,
+      deliveryCost: deliveryCost,
+      deliveryAddress: customer.address,
+      status: 'pending',
+      totalPrice: totalPrice,
+      totalPriceAndDelivery: totalPrice + deliveryCost
+    })
+    
+    return await order.save()
   }
 
 }

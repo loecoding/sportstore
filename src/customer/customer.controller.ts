@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Query } from '@nestjs/common';
+import { OrderPayloadDto } from 'src/order/dto/create-order.dto';
 import { OrderService } from 'src/order/order.service';
 import { ProductService } from 'src/product/product.service';
 import { CustomerService } from './customer.service';
@@ -40,11 +41,11 @@ export class CustomerController {
     return this.customerService.deleteCustomer(id);
   }
   
-  @Post('/shopping/:customerId/:productId/:quantity')
-  async shopping(@Param('customerId') customerId: string , @Param('productId') productId:string 
-  , @Param('quantity') quantity:number){
-    // console.log({customerId,productId})
-    return await this.orderService.getOrderByProductId(customerId,productId,quantity)
+  @Post('/shopping/:customerId')
+  async shopping(@Param('customerId') customerId: string , @Body() payload: OrderPayloadDto
+  ){
+    
+    return await this.orderService.getOrderByVariantId(customerId, payload)
   }
 
   @Post('/payment/:orderId/:pay')

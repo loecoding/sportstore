@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { LineItem } from "../dto/create-order.dto";
 
 export class OrderEntity {
     customerId : string;
@@ -13,4 +13,5 @@ export class OrderEntity {
     status: string;
     totalPrice: number;
     totalPriceAndDelivery: number;
+    line_items: LineItem[]
 }

@@ -5,8 +5,6 @@ export type CategoryDocument = Category & Document;
 
 @Schema()
 export class Category {
-  @Prop()
-  id: string;
 
   @Prop()
   name: string;

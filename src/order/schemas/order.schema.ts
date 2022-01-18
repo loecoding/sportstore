@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+import { LineItem, OrderPayloadDto } from '../dto/create-order.dto';
 
 export type OrderDocument = Order & Document;
 //{timestamps: true}
@@ -12,11 +13,11 @@ export class Order {
   @Prop()
   customerName : string
 
-  @Prop()
-  productName: string;
+  // @Prop()
+  // productName: string;
 
-  @Prop()
-  productQuantity: number;
+  @Prop({type: [{variantId: Types.ObjectId , quantity: Number}] , _id:false})
+  line_items: LineItem[];
 
   @Prop()
   paymentId: string;

@@ -52,4 +52,9 @@ export class CategoryController {
     return this.productService.showTwoCategoryProduct(categoryId, categoryId2)
   }
 
+  @Get('/group/:categoryId')
+  groupProduct(@Param('categoryId') categoryId: string){
+    return this.productService.matchProduct(categoryId)
+  }
+
 }
