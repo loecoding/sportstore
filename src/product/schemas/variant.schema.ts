@@ -4,7 +4,7 @@ import { BaseSchema } from './base.schema';
 
 export type VariantDocument = Variant & Document;
 
-@Schema()
+@Schema({ versionKey: false })
 export class Variant extends BaseSchema {
 
   @Prop({type: MongooseSchema.Types.ObjectId })

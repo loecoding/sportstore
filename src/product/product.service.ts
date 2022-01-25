@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Mongoose, Types } from 'mongoose';
 import { CreateProductDto, CreateVariantDto } from './dto/create-product.dto';
@@ -6,6 +6,10 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { Product , ProductDocument} from './schemas/product.schema';
 import { CategoryService } from 'src/category/category.service';
 import { Variant, VariantDocument } from './schemas/variant.schema';
+import { escapeRegExp } from 'lodash';
+import { getSkip, getTotalPage } from 'src/util/pagination';
+import { OrderPayloadDto } from 'src/order/dto/create-order.dto';
+import console from 'console';
 
 
 @Injectable()
@@ -16,19 +20,21 @@ export class ProductService {
   ){}
 
   addProduct(data: CreateProductDto): Promise<Product> {
-
     return new this.productModel({...data, category: new Types.ObjectId(data.category)}).save()
   }
 
   async addVariant(variant: CreateVariantDto){
- 
       const newVariant = await new this.variantModel({...variant , productId: new Types.ObjectId(variant.productId)}).save()
       const productId  = newVariant.productId.toString()
       const variantId  = newVariant._id.toString()
       const addVariantToArray = await this.productModel.findByIdAndUpdate({_id: productId}, {$push: {variants: new Types.ObjectId(variantId)}}
       ).exec()
-    
     return newVariant && addVariantToArray
+  }
+
+  async insertVariantIdToArray(productId: string, variantId: string) {
+    return await this.productModel.findByIdAndUpdate({_id: productId}, {$push: {variants: new Types.ObjectId(variantId)}}
+    ).exec()
   }
 
   async showProduct() {
@@ -43,19 +49,22 @@ export class ProductService {
     return this.variantModel.findOne({_id: id})
   }
 
+
   async findVariantByIds(ids: string[]) {
     return this.variantModel.find({_id: {$in: ids}})
   }
 
-  async decreaseVariantQuantity(id: string , quantity: number) {
-    console.log({id, quantity})
-    return this.variantModel.updateOne({_id: id},{ $inc: {quantity: -quantity} })
+  // async findVariantQuantityById(ids: string[]) {
+  //   return this.variantModel.find({_id: {$in: ids}})
+  // }
+
+  async findProductAndVariant(categoryId: string) {
+    return await this.productModel.findOne({category: categoryId}).populate(['variants' , 'category']).exec()
   }
 
   async updateProduct(id: string, updateProductDto: UpdateProductDto) {
     return this.productModel.updateOne({_id: id} , {$set:{...updateProductDto}})
   }
-
 
   async matchProduct(categoryId: string) {
     return await this.productModel.aggregate([
@@ -91,37 +100,6 @@ export class ProductService {
     ]).exec()
   }
 
-  async findProductAndVariant(categoryId: string) {
-    return await this.productModel.findOne({category: categoryId}).populate(['variants' , 'category']).exec()
-  }
-
-  async deleteAllQuantityOfCategory(categoryId: string) {
-    // await this.productModel.aggregate([
-    //   {$match: { _id : new Types.ObjectId(productId) }},
-    //   {$unset: "quantity"}
-    // ]).exec()
-    return await this.productModel.update({category: categoryId} , {$unset: {price: ""}})
-  }
-
-  async deleteProduct(id: string) {
-    return this.productModel.deleteOne({_id: id})
-  }
-
-  async getPriceByVariantId(variantId: string , quantity: number): Promise<Variant>{
-    const findVariant = await this.findVariant(variantId); 
-    const updateQuantity = findVariant.quantity - quantity
-    
-    const variantDocument = await this.variantModel.findOne({_id: variantId}).populate('price').exec() 
-    && await this.variantModel.findOneAndUpdate({_id: variantId},{quantity: updateQuantity}).exec()
-    if (!variantDocument) {
-      return;
-    }
-    const variant = variantDocument.toObject();
-    const price = variant.price;
-    console.log({price})
-    return {...variant , price}
-  }
-
   async showCategoryProduct(categoryId : string) {
     const productDocument = await this.productModel.find({category: categoryId})
     .populate('category').exec()
@@ -136,14 +114,92 @@ export class ProductService {
     return productDocument 
   }
 
-  async insertVariantIdToArray(productId: string, variantId: string) {
-    return await this.productModel.findByIdAndUpdate({_id: productId}, {$push: {variants: new Types.ObjectId(variantId)}}
-    ).exec()
+  // async deleteAllQuantityOfCategory(categoryId: string) {
+    // await this.productModel.aggregate([
+    //   {$match: { _id : new Types.ObjectId(productId) }},
+    //   {$unset: "quantity"}
+    // ]).exec()
+  //   return await this.productModel.update({category: categoryId} , {$unset: {price: ""}})
+  // }
+
+  async deleteProduct(productId: string) {
+    return this.productModel.deleteOne({_id: productId})
   }
 
-  async insertSize(id: string, insertProductSize: string) {
-    
-    return await this.productModel.findByIdAndUpdate({_id: id}, {$push: {size: insertProductSize}}
-    ).exec()
+  async deleteVariant(variantId: string){
+    const variant = await this.findVariant(variantId)
+    const productId  = variant.productId
+    // const deleteVariantInArray = await this.productModel.findByIdAndUpdate({_id: productId} , 
+    //   {$unset: {variants:  {$in: variantId} }}
+    // ).exec()
+    console.log(productId)
+    return await this.productModel.updateOne({_id: productId} , {$pull: {variants: new Types.ObjectId(variantId) } }).lean().exec()
+    // && await this.variantModel.deleteOne({_id: variantId}).exec()
   }
+
+  // async getPriceByVariantId(variantId: string , quantity: number): Promise<Variant>{
+  //   const findVariant = await this.findVariant(variantId); 
+  //   const updateQuantity = findVariant.quantity - quantity
+    
+  //   const variantDocument = await this.variantModel.findOne({_id: variantId}).populate('price').exec() 
+  //   && await this.variantModel.findOneAndUpdate({_id: variantId},{quantity: updateQuantity}).exec()
+  //   // if (!variantDocument) {
+  //   //   return;
+  //   // }
+  //   const variant = variantDocument.toObject();
+  //   const price = variant.price;
+  //   console.log({price})
+  //   return {...variant , price}
+  // }
+
+
+  async checkQuantity(variantId: string){
+    const variant = await this.variantModel.findOne({_id: variantId}).populate('quantity').exec()
+        if (!variant) {
+      return;
+    }
+    const newvariant =  variant.toObject()
+    const newQuantity =newvariant.quantity
+    console.log(newQuantity)
+    return {...newvariant, newQuantity}
+  }
+
+  async decreaseVariantQuantity(variantId: string , quantity: number){
+    // console.log({variantId, quantity})
+    const variant = await this.variantModel.findOne({_id: variantId}).populate('quantity').exec()
+    if (!variant) {
+      return;
+    }
+    const newvariant =  variant.toObject()
+    const variantQuantity = newvariant.quantity
+
+    if(variantQuantity < quantity){
+      throw new UnprocessableEntityException(
+        `Quantity Not Enough variantId: (${variantId}) quantity: (${variantQuantity})`,
+        );
+    }
+    return this.variantModel.updateOne({_id: variantId},{ $inc: {quantity: -quantity} })
+  }
+
+  async showProductEachPage(page: number , pageSize: number , search: string) {
+
+    const filter = {name: {$regex: new RegExp(escapeRegExp(search) , 'i') } }
+
+    const totalDocs = await this.productModel.count(filter);
+    const documents = await this.productModel.find(filter).skip(getSkip(page,pageSize)).limit(pageSize);
+  
+    const result = {
+      docs: documents,
+      page: page,
+      perPage: pageSize,
+      totalDocs: totalDocs, 
+      totalPages: getTotalPage(totalDocs , pageSize),// todo calculate 
+    };
+
+    return result;
+  }
+
+
+
+  
 } 

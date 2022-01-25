@@ -5,7 +5,7 @@ import { Variant } from './variant.schema';
 
 export type ProductDocument = Product & Document;
 
-@Schema()
+@Schema({ versionKey: false })
 export class Product {
 
   @Prop()

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ProductService } from 'src/product/product.service';
@@ -12,7 +12,10 @@ import { OrderService } from 'src/order/order.service';
 @Injectable()
 export class CustomerService {
   constructor(@InjectModel(Customer.name) private customerModel: Model<CustomerDocument> 
-  , private readonly productService: ProductService , private readonly oderService: OrderService){}
+  // , private readonly productService: ProductService , private readonly oderService: OrderService
+  , @Inject(forwardRef(() => ProductService)) private readonly productService: ProductService
+  , @Inject(forwardRef(() => OrderService)) private readonly orderService: OrderService
+  ){}
 
   async addCustomer(createCustomerDto: CreateCustomerDto): Promise<Customer> {
     return new this.customerModel(createCustomerDto).save()

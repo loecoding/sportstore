@@ -4,7 +4,7 @@ import { LineItem, OrderPayloadDto } from '../dto/create-order.dto';
 
 export type OrderDocument = Order & Document;
 //{timestamps: true}
-@Schema()
+@Schema({ versionKey: false })
 export class Order {
 
   @Prop()

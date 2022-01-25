@@ -44,17 +44,22 @@ export class OrderService {
       paymentId: uuid() }).lean().exec()
     
     for(const lineItem of findAndPayment.line_items){
-      const check = await this.productService.decreaseVariantQuantity(lineItem.variantId , lineItem.quantity)
-      // console.log(check)
+      await this.productService.decreaseVariantQuantity(lineItem.variantId , lineItem.quantity)
+ 
     }
       
     return findAndPayment
 }
 
-async getTotalPrice(variant: Variant , payload : OrderPayloadDto) {
-  const lineItem = payload.line_items.find(item => item.variantId === variant._id.toString())
-  return variant.price * lineItem.quantity
-}
+  async getTotalPrice(variant: Variant , payload : OrderPayloadDto) {
+    const lineItem = payload.line_items.find(item => item.variantId === variant._id.toString())
+    return variant.price * lineItem.quantity
+  }
+
+  async getQuantity(variant: Variant , payload : OrderPayloadDto) {
+    const lineItem = payload.line_items.find(item => item.variantId === variant._id.toString())
+    return lineItem.quantity
+  }
 
   async getOrderByVariantId(customerId: string , payload : OrderPayloadDto){
     const customer = await this.customerService.findCustomerById(customerId)
@@ -64,13 +69,11 @@ async getTotalPrice(variant: Variant , payload : OrderPayloadDto) {
     let totalPrice = 0
     for(const variant of variantProducts){
       const price = await this.getTotalPrice(variant , payload)
-      totalPrice += price 
+      totalPrice = totalPrice + price 
     }
 
     // let orderArray = new OrderEntity()
-
     // orderArray.line_items = payload.line_items
-
     // orderArray.customerId = customerId
     // orderArray.customerName = customer.name
     // // orderArray.productName = product.name
@@ -111,7 +114,6 @@ async getTotalPrice(variant: Variant , payload : OrderPayloadDto) {
       totalPrice: totalPrice,
       totalPriceAndDelivery: totalPrice + deliveryCost
     })
-    
     return await order.save()
   }
 
