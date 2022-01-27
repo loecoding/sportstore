@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
+import { UpdateOrderPayloadDto } from './dto/update-order.dto';
 import { Customer } from 'src/customer/schemas/customer.schema';
 import { CustomerService} from 'src/customer/customer.service'
 import { ProductService } from 'src/product/product.service';
@@ -27,11 +27,11 @@ export class OrderController {
     return this.orderService.findOrder(id);
   }
   
-  @Put(':id')
-  updateOrder(@Param('id') id: string, @Body() updateCatDto: UpdateOrderDto) {
-    console.log(id)
-    return this.orderService.updateOrder(id, updateCatDto);
-  }
+  // @Put(':id')
+  // updateOrder(@Param('id') id: string, @Body() updateCatDto: UpdateOrderDto) {
+  //   console.log(id)
+  //   return this.orderService.updateOrder(id, updateCatDto);
+  // }
 
   @Delete(':id')
   deleteOrder(@Param('id') id: string) {

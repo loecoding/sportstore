@@ -5,13 +5,15 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Customer, CustomerSchema } from './schemas/customer.schema';
 import { ProductModule } from 'src/product/product.module';
 import { OrderModule } from 'src/order/order.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Customer.name , schema: CustomerSchema }]) 
-    , forwardRef(() => ProductModule)
-    , forwardRef(() => OrderModule)
+    MongooseModule.forFeature([{ name: Customer.name , schema: CustomerSchema }]) ,
+    forwardRef(() => ProductModule) ,
+    forwardRef(() => OrderModule) ,
+    AuthModule ,
   ],
   controllers: [CustomerController],
   providers: [CustomerService ],

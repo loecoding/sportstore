@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Order , OrderDocument } from './schemas/order.schema';
 import { CreateOrderDto, OrderPayloadDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
+import { UpdateOrderPayloadDto } from './dto/update-order.dto';
 import { CustomerService } from 'src/customer/customer.service';
 import { ProductService } from 'src/product/product.service';
 import { OrderEntity } from "./entities/order.entity"
@@ -16,21 +16,23 @@ export class OrderService {
   ,@Inject(forwardRef(() => CustomerService)) private readonly customerService: CustomerService
   ,@Inject(forwardRef(() => ProductService)) private readonly productService: ProductService
   ){}
+  // OrderArray:OrderEntity[] = []
 
-  OrderArray:OrderEntity[] = []
-  
   async showOrder() {
     return this.orderModel.find()
   }
 
   async findOrder(id: string) {
-
     return this.orderModel.findOne({_id: id})
   }
 
-  async updateOrder(id: string, udateOrderDto: UpdateOrderDto) {
-    return this.orderModel.updateOne({_id: id}, 
-      {$set:{...udateOrderDto}})
+  // async updateOrder(id: string, udateOrderDto: UpdateOrderDto) {
+  //   return this.orderModel.updateOne({_id: id}, 
+  //     {$set:{...udateOrderDto}})
+  // }
+
+  async findlineItemsById(ids: string[]) {
+    return this.orderModel.find({_id: {$in: ids}})
   }
 
   async deleteOrder(id: string) {
@@ -38,18 +40,15 @@ export class OrderService {
   }
 
   async paymentMethod(orderId: string , pay: number){
-    
     const findAndPayment = await this.orderModel.findOneAndUpdate(
       {_id: orderId , totalPriceAndDelivery: pay } , {status:'paid' , timePayment: new Date() , deliveryType:'Kerry' ,
       paymentId: uuid() }).lean().exec()
-    
+
     for(const lineItem of findAndPayment.line_items){
       await this.productService.decreaseVariantQuantity(lineItem.variantId , lineItem.quantity)
- 
     }
-      
     return findAndPayment
-}
+  }
 
   async getTotalPrice(variant: Variant , payload : OrderPayloadDto) {
     const lineItem = payload.line_items.find(item => item.variantId === variant._id.toString())
@@ -63,48 +62,48 @@ export class OrderService {
 
   async getOrderByVariantId(customerId: string , payload : OrderPayloadDto){
     const customer = await this.customerService.findCustomerById(customerId)
-    const variantProducts = await this.productService.findVariantByIds(payload.line_items.map(item => item.variantId
-    ))
-
+    const variantProducts = await this.productService.findVariantByIds(payload.line_items.map( item => item.variantId ))
+    // console.log(variantProducts)
     let totalPrice = 0
     for(const variant of variantProducts){
       const price = await this.getTotalPrice(variant , payload)
       totalPrice = totalPrice + price 
     }
 
-    // let orderArray = new OrderEntity()
-    // orderArray.line_items = payload.line_items
-    // orderArray.customerId = customerId
-    // orderArray.customerName = customer.name
-    // // orderArray.productName = product.name
-    // // orderArray.productQuantity = quantity
-    // orderArray.paymentId = null
-    // orderArray.timePayment = null
-    // orderArray.deliveryType = null
-    // orderArray.deliveryCost = 45
-    // orderArray.deliveryAddress = customer.address
-    // orderArray.status = 'pending'
-    // orderArray.totalPrice = totalPrice
-    // orderArray.totalPriceAndDelivery = orderArray.totalPrice + orderArray.deliveryCost
+    /*Add Data to collection
+    let orderArray = new OrderEntity()
+    orderArray.line_items = payload.line_items
+    orderArray.customerId = customerId
+    orderArray.customerName = customer.name
+    // orderArray.productName = product.name
+    // orderArray.productQuantity = quantity
+    orderArray.paymentId = null
+    orderArray.timePayment = null
+    orderArray.deliveryType = null
+    orderArray.deliveryCost = 45
+    orderArray.deliveryAddress = customer.address
+    orderArray.status = 'pending'
+    orderArray.totalPrice = totalPrice
+    orderArray.totalPriceAndDelivery = orderArray.totalPrice + orderArray.deliveryCost
 
-    // const order = new Order()
-    // order.line_items = payload.line_items
-    // order.customerId = customerId
-    // order.customerName = customer.name
-    // order.paymentId = null
-    // order.timePayment = null
-    // order.deliveryType = null
-    // order.deliveryCost = 45
-    // order.deliveryAddress = customer.address
-    // order.status = 'pending'
-    // order.totalPrice = totalPrice
-    // order.totalPriceAndDelivery = order.totalPrice + order.deliveryCost
+    const order = new Order()
+    order.line_items = payload.line_items
+    order.customerId = customerId
+    order.customerName = customer.name
+    order.paymentId = null
+    order.timePayment = null
+    order.deliveryType = null
+    order.deliveryCost = 45
+    order.deliveryAddress = customer.address
+    order.status = 'pending'
+    order.totalPrice = totalPrice
+    order.totalPriceAndDelivery = order.totalPrice + order.deliveryCost*/
 
     const deliveryCost = 45
     const order = new this.orderModel({
       line_items: payload.line_items , 
       customerId: customerId ,
-      customerName: customer.name ,
+      customerName: customer.name,
       paymentId: null,
       timePayment: null,
       deliveryType: null,
@@ -117,4 +116,9 @@ export class OrderService {
     return await order.save()
   }
 
+  async updateCart(orderId : string , payload: OrderPayloadDto){
+    // const line_item = await this.orderModel.findOneAndUpdate({_id: orderId} , {$set: {line_items: payload.line_items} })
+    
+    return await this.orderModel.findOneAndUpdate({_id: orderId} , {$set: {line_items: payload.line_items} })
+  }
 }

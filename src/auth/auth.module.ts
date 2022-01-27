@@ -4,16 +4,18 @@ import { PassportModule } from '@nestjs/passport';
 import { UsersModule } from 'src/users/users.module';
 import { AuthService } from './auth.service';
 
-import { LocalStrategy } from './local.strategy';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { ConfigService } from '@nestjs/config';
+import { CustomerModule } from 'src/customer/customer.module';
+
 
 @Module({
   imports: [
     forwardRef(() => UsersModule) ,
     forwardRef(() => PassportModule) ,
-
+    forwardRef(() => CustomerModule) ,
+    
     // JwtModule.register({
     //   secret: jwtConstants.secret,
     //   signOptions: { expiresIn: '30s' },
@@ -27,7 +29,7 @@ import { ConfigService } from '@nestjs/config';
     }),
 
   ],
-  providers: [AuthService , LocalStrategy , JwtStrategy] ,
+  providers: [AuthService , JwtStrategy] ,
   exports: [AuthService],
   controllers: [AuthController]
 })

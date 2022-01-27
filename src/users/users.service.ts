@@ -4,7 +4,10 @@ export type User = {
   id : number;
   username: string;
   password: string
+  role: string
 };
+
+export type UserWithoutPassword = Pick< User , Exclude <keyof User, 'password'>>
 
 @Injectable()
 export class UsersService {
@@ -13,11 +16,13 @@ export class UsersService {
           id: 1,
           username: 'john',
           password: '123456',
+          role: 'admin'
         },
         {
           id: 2,
           username: 'mark',
           password: '654321',
+          role: 'user'
         },
       ];
     

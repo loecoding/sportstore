@@ -1,7 +1,10 @@
 import { Body, Controller, Get, Inject, Post, Req, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth-guard';
-import { PayloadAuthDto } from './user-pass.dto';
+import { Roles } from './roles.decorator';
+import { RolesGuard } from './roles.guard';
+import { PayloadAuthDto } from './payload.dto';
+import { UserRole } from 'src/customer/schemas/customer.schema';
 
 @Controller('auth')
 export class AuthController {
@@ -16,6 +19,13 @@ export class AuthController {
     @Get('test')
     @UseGuards(JwtAuthGuard)
     async testPayload(@Req() req){
+        return {msg: 'success' , auth: req.user}
+    }
+
+    @Get('role')
+    @UseGuards(JwtAuthGuard , RolesGuard)
+    @Roles(UserRole.USER)
+    async testGuard(@Req() req){
         return {msg: 'success' , auth: req.user}
     }
 }

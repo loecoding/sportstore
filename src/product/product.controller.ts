@@ -83,10 +83,10 @@ export class ProductController {
     return this.productService.findProductAndVariant(categoryId);
   } 
 
-  @Put('/variant/:productId')
-  insertVariantIdToArray(@Param('productId') productId: string, @Body('variantId') variantId: string) {
-    console.log(variantId)
-    return this.productService.insertVariantIdToArray(productId , variantId);
-  } 
+  // @Put('/variant/:productId')
+  // insertVariantIdToArray(@Param('productId') productId: string, @Body('variantId') variantId: string) {
+  //   console.log(variantId)
+  //   return this.productService.insertVariantIdToArray(productId , variantId);
+  // } 
 
 }
