@@ -1,17 +1,13 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Query, UnprocessableEntityException, Inject, forwardRef, UseGuards, Req, ForbiddenException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guard';
 import { JwtPayload } from 'src/auth/jwt-payload';
 import { Roles } from 'src/auth/roles.decorator';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { UserAuth } from 'src/auth/user-auth.decorator';
-import { OrderPayloadDto } from 'src/order/dto/create-order.dto';
-import { UpdateOrderPayloadDto } from 'src/order/dto/update-order.dto';
+import { OrderPayloadDto, ValidateQuery } from 'src/order/dto/create-order.dto';
 import { OrderService } from 'src/order/order.service';
 import { ProductService } from 'src/product/product.service';
-import { Product, ProductDocument } from 'src/product/schemas/product.schema';
-import { Variant, VariantDocument } from 'src/product/schemas/variant.schema';
 import { CustomerService } from './customer.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
@@ -78,8 +74,8 @@ export class CustomerController {
   @Post('/payment/')
   @UseGuards(JwtAuthGuard , RolesGuard)
   @Roles(UserRole.USER)
-  async payment(@Query('orderId') orderId: string ,  @Query('pay')  pay: number , @UserAuth() {sub: customerIdPayload} : JwtPayload){
-    const order = await this.orderService.findOrder(orderId)
+  async payment(@Query() query : ValidateQuery, @UserAuth() {sub: customerIdPayload} : JwtPayload){
+    const order = await this.orderService.findOrder(query.id)
     const status = order.status.toString()
     const customerId = order.customerId.toString()
 
@@ -88,18 +84,18 @@ export class CustomerController {
     }
     if(status === 'paid'){
       throw new UnprocessableEntityException(
-        `This Order have been payment : ${orderId}`,
+        `This Order have been payment : ${query.id}`,
         );
     }
-    return await this.orderService.paymentMethod(orderId,pay)
+    return await this.orderService.paymentMethod(query.id,query.pay)
   }
 
   @Patch('/cart/')
   @UseGuards(JwtAuthGuard , RolesGuard)
   @Roles(UserRole.USER)
-  async updateCart(@Query('orderId') orderId: string , @Body() updatePayloadOrderDto : OrderPayloadDto){
-
-      return await this.orderService.updateCart(orderId , updatePayloadOrderDto )
+  async updateCart(@Query() qs: ValidateQuery , @Body() updatePayloadOrderDto : OrderPayloadDto){
+      // console.log(qs)
+      return await this.orderService.updateCart(qs.id , updatePayloadOrderDto )
   }
 
 }

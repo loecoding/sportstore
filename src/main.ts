@@ -11,7 +11,7 @@ async function bootstrap() {
     stopAtFirstError: true ,
     // errorHttpStatusCode: 503
     exceptionFactory: (errors) =>{
-      console.log(errors)
+      // console.log(errors)
       throw new BadRequestException(errors.map(err => `${err.property} : ${err.value} : ${Object.keys(err.constraints).map
         ( key=> err.constraints[key]).join(" , ") }` ))
     }

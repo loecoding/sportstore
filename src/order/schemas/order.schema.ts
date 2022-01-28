@@ -1,9 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { LineItem, OrderPayloadDto } from '../dto/create-order.dto';
+import { LineItem } from '../dto/create-order.dto';
+import * as mongooseDelete from 'mongoose-delete';
 
 export type OrderDocument = Order & Document;
-//{timestamps: true}
+
 @Schema({ versionKey: false })
 export class Order {
 
@@ -44,4 +45,9 @@ export class Order {
   totalPriceAndDelivery: number;
 }
 
-export const OrderSchema = SchemaFactory.createForClass(Order);
+export const OrderSchema = SchemaFactory.createForClass(Order).plugin(mongooseDelete ,
+  {
+    deletedAt: true,
+    overrideMethods: 'all',
+  },
+);

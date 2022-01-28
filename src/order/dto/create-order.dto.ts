@@ -1,3 +1,4 @@
+import { IsInt, IsMongoId } from "class-validator"
 export class CreateOrderDto {}
 
 export class OrderPayloadDto {
@@ -7,4 +8,10 @@ export class OrderPayloadDto {
 export class LineItem {
     readonly variantId: string
     readonly quantity: number
+}
+export class ValidateQuery{
+    @IsMongoId()
+    readonly id: string
+    @IsInt()
+    readonly pay: number
 }
