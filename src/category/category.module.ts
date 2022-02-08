@@ -3,8 +3,8 @@ import { CategoryService } from './category.service';
 import { CategoryController } from './category.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Category, CategorySchema } from './schemas/category.schema';
-import { CustomerModule } from 'src/customer/customer.module';
-import { ProductModule } from 'src/product/product.module';
+import { CustomerModule } from '../customer/customer.module';
+import { ProductModule } from '../product/product.module';
 
 @Module({
   imports: [

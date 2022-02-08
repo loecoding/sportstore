@@ -5,19 +5,24 @@ import * as mongooseDelete from 'mongoose-delete';
 
 export type OrderDocument = Order & Document;
 
-@Schema({ versionKey: false })
+export enum OrderStatus {
+  PAID = 'Paid',
+  PENDDING = 'Pending',
+  CANCEL = 'Cancel',
+  EXPIRED = 'Expired',
+}
+
+export enum DeliveryType {}
+
+@Schema({ versionKey: false, timestamps: true })
 export class Order {
+  @Prop()
+  customerId: string;
 
   @Prop()
-  customerId : string
+  customerName: string;
 
-  @Prop()
-  customerName : string
-
-  // @Prop()
-  // productName: string;
-
-  @Prop({type: [{variantId: Types.ObjectId , quantity: Number}] , _id:false})
+  @Prop({ type: [{ variantId: Types.ObjectId, quantity: Number }], _id: false })
   line_items: LineItem[];
 
   @Prop()
@@ -25,7 +30,7 @@ export class Order {
 
   @Prop()
   timePayment: Date;
-  
+
   @Prop()
   deliveryType: string;
 
@@ -45,7 +50,8 @@ export class Order {
   totalPriceAndDelivery: number;
 }
 
-export const OrderSchema = SchemaFactory.createForClass(Order).plugin(mongooseDelete ,
+export const OrderSchema = SchemaFactory.createForClass(Order).plugin(
+  mongooseDelete,
   {
     deletedAt: true,
     overrideMethods: 'all',

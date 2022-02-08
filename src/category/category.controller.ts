@@ -1,7 +1,11 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, Inject, forwardRef } from '@nestjs/common';
-import { get } from 'http';
-import { CustomerService } from 'src/customer/customer.service';
-import { ProductService } from 'src/product/product.service';
+import { Controller, Get, Post, Body, Param, Delete, Put, Inject, forwardRef, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/jwt-auth-guard';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
+import { CustomerService } from '../customer/customer.service';
+import { UserRole } from '../customer/schemas/customer.schema';
+import { ProductService } from '../product/product.service';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -14,6 +18,10 @@ export class CategoryController {
     ) {}
 
   @Post()
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'add category succeeded.' })
+  @UseGuards(JwtAuthGuard , RolesGuard)
+  @Roles(UserRole.ADMIN)
   addCategory(@Body() createCategory: CreateCategoryDto) {
     console.log({createCategory})
     return this.categoryService.addCategory(createCategory);
@@ -31,12 +39,20 @@ export class CategoryController {
   }
 
   @Put('/update/:id')
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'add category succeeded.' })
+  @UseGuards(JwtAuthGuard , RolesGuard)
+  @Roles(UserRole.ADMIN)
   updateCategory(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
     console.log(id)
     return this.categoryService.updateCategory(id, updateCategoryDto);
   }
 
   @Delete('/delete/:id')
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'delete category succeeded.' })
+  @UseGuards(JwtAuthGuard , RolesGuard)
+  @Roles(UserRole.ADMIN)
   deleteCategory(@Param('id') id: string) {
     console.log(id)
     return this.categoryService.deleteCategory(id);

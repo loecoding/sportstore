@@ -1,27 +1,37 @@
-import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ProductService } from 'src/product/product.service';
+import { ProductService } from '../product/product.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { Customer, CustomerDocument } from './schemas/customer.schema';
-import { OrderService } from 'src/order/order.service';
+import { OrderService } from '../order/order.service';
 // import { createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto';
 // import { promisify } from 'util';
 import * as bcrypt from 'bcrypt';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService } from '../auth/auth.service';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class CustomerService {
-  constructor(@InjectModel(Customer.name) private customerModel: Model<CustomerDocument> 
-  // , private readonly productService: ProductService 
-  , private readonly authService: AuthService
-  , @Inject(forwardRef(() => ProductService)) private readonly productService: ProductService
-  , @Inject(forwardRef(() => OrderService)) private readonly orderService: OrderService
-  ){}
+  constructor(
+    @InjectModel(Customer.name) private customerModel: Model<CustomerDocument>,
+    // , private readonly productService: ProductService
+    private readonly authService: AuthService,
+    @Inject(forwardRef(() => ProductService))
+    private readonly productService: ProductService,
+    @Inject(forwardRef(() => OrderService))
+    private readonly orderService: OrderService,
+  ) {}
 
   async addCustomer(createCustomerDto: CreateCustomerDto): Promise<Customer> {
-      /*Encryption
+    /*Encryption
       const iv = randomBytes(16);
       const password = createCustomerDto.password.toString()
       // The key length is dependent on the algorithm.
@@ -57,29 +67,32 @@ export class CustomerService {
     }
     return new this.customerModel({...createCustomerDto , password: `${str}:${iv.toString('base64')}`}).save()*/
 
-    return new this.customerModel({...createCustomerDto , password: await this.authService.hash(createCustomerDto.password)})
-    .save()
+    return new this.customerModel({
+      ...createCustomerDto,
+      password: await this.authService.hash(createCustomerDto.password),
+    }).save();
   }
 
   async showCustomer() {
-    return this.customerModel.find()
+    return this.customerModel.find();
   }
 
-  async findCustomerById(id: string): Promise<Customer>{
-    return this.customerModel.findOne({_id: id})
+  async findCustomerById(id: string): Promise<Customer> {
+    return this.customerModel.findOne({ _id: id });
   }
 
-  async findOneByUsername(username: string): Promise<Customer>{
-    return this.customerModel.findOne({username})
+  async findOneByUsername(username: string): Promise<Customer> {
+    return this.customerModel.findOne({ username });
   }
 
   async updateCustomer(id: string, updateCustomerDto: UpdateCustomerDto) {
     return this.customerModel.updateOne(
-      {_id: id}, {$set:{...updateCustomerDto}})
+      { _id: id },
+      { $set: { ...updateCustomerDto } },
+    );
   }
 
   async deleteCustomer(id: string) {
-    return this.customerModel.deleteOne({_id: id})
+    return this.customerModel.deleteOne({ _id: id });
   }
-
 }

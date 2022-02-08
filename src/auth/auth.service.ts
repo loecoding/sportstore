@@ -2,7 +2,7 @@ import { forwardRef, Inject, Injectable, UnauthorizedException } from '@nestjs/c
 import { User, UsersService, UserWithoutPassword } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload';
-import { CustomerService } from 'src/customer/customer.service';
+import { CustomerService } from '../customer/customer.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()

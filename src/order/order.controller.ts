@@ -3,8 +3,8 @@ import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderPayloadDto } from './dto/update-order.dto';
 import { Customer } from 'src/customer/schemas/customer.schema';
-import { CustomerService} from 'src/customer/customer.service'
-import { ProductService } from 'src/product/product.service';
+import { CustomerService} from '../customer/customer.service'
+import { ProductService } from '../product/product.service';
 
 @Controller('order')
 export class OrderController {

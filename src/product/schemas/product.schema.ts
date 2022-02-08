@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types , Schema as MongooseSchema} from 'mongoose';
-import { Category } from 'src/category/schemas/category.schema';
+import { Category } from '../../category/schemas/category.schema';
 import { Variant } from './variant.schema';
 
 export type ProductDocument = Product & Document;
 
-@Schema({ versionKey: false })
+@Schema({ versionKey: false , timestamps: true})
 export class Product {
 
   @Prop()
@@ -17,8 +17,8 @@ export class Product {
   @Prop({type: MongooseSchema.Types.ObjectId , ref: Category.name})
   category: Types.ObjectId;
 
-  @Prop({type: MongooseSchema.Types.Array , ref: Variant.name})
-  variants: Types.ObjectId
+  @Prop({type: [{ type: Types.ObjectId, ref: Variant.name }] })
+  variants: Types.ObjectId[]
 
 }
 

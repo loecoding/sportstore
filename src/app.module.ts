@@ -10,18 +10,30 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import AuthConfig from './config/auth.config';
+import { CommandModule } from 'nestjs-command';
+import { UserCommand } from './users/user.command';
+import { UsersService } from './users/users.service';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TaskModule } from './task/task.module';
 
 @Module({
-  imports: [CustomerModule ,ProductModule , OrderModule , CategoryModule , MongooseModule.forRoot('mongodb://localhost/mydb'),
-   AuthModule , 
-   UsersModule , 
-   ConfigModule.forRoot({
-     isGlobal: true,
-     load: [AuthConfig]
-   })
-  //  JwtModule.register({ secret: 'hard!to-guess_secret' })
+  imports: [
+    // CustomerModule,
+    // ProductModule,
+    // OrderModule,
+    // CategoryModule,
+    MongooseModule.forRoot('mongodb://localhost/sss'),
+    // AuthModule,
+    // UsersModule,
+    // ConfigModule.forRoot({
+    //   isGlobal: true,
+    //   load: [AuthConfig],
+    // }),
+    // CommandModule,
+    // ScheduleModule.forRoot(),
+    // TaskModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, UserCommand, UsersService],
 })
 export class AppModule {}
