@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsMongoId, IsNumberString } from 'class-validator';
+import { IsInt, IsMongoId, IsNumber, IsNumberString } from 'class-validator';
 export class CreateOrderDto {}
 
 export class OrderPayloadDto {
@@ -23,6 +23,6 @@ export class ValidateQuery {
 
 export class ValidateId {
   @ApiProperty()
-  //   @IsMongoId()
+  @IsMongoId()
   readonly id: string;
 }

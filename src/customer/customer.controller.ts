@@ -130,9 +130,7 @@ export class CustomerController {
       throw new ForbiddenException('This order not is your order!');
     }
     if (
-      status === OrderStatus.PAID ||
-      OrderStatus.CANCEL ||
-      OrderStatus.EXPIRED
+      status === (OrderStatus.PAID || OrderStatus.CANCEL || OrderStatus.EXPIRED)
     ) {
       throw new UnprocessableEntityException(
         `This Order : ${query.id} staus : ${status}`,

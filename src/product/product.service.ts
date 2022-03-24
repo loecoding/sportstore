@@ -14,7 +14,6 @@ import { CategoryService } from '../category/category.service';
 import { Variant, VariantDocument } from './schemas/variant.schema';
 import { escapeRegExp } from 'lodash';
 import { getSkip, getTotalPage } from '../util/pagination';
-import { OrderPayloadDto } from 'src/order/dto/create-order.dto';
 import console from 'console';
 
 @Injectable()
@@ -26,7 +25,7 @@ export class ProductService {
     private readonly categoryService: CategoryService,
   ) {}
 
-  addProduct(data: CreateProductDto): Promise<Product> {
+  createProduct(data: CreateProductDto): Promise<Product> {
     return new this.productModel({
       ...data,
       category: new Types.ObjectId(data.category),
@@ -104,10 +103,22 @@ export class ProductService {
             as: 'categoryName',
           },
         },
-        { $match: { category: new Types.ObjectId(categoryId) } },
-        { $unwind: '$stock' },
+        {
+          $lookup: {
+            from: 'variants',
+            localField: 'variants',
+            foreignField: '_id',
+            as: 'variantProduct',
+          },
+        },
+        // { $match: { category: new Types.ObjectId(categoryId) } },
+        // {$unwind: "$stock"},
         // { $group: { _id: '$sizes', count: { $sum:1 } } }
         // {$out: "resultSize"}
+        { $match: { category: new Types.ObjectId(categoryId) } },
+        { $unwind: '$stock' },
+        { $group: { _id: '$sizes', count: { $sum: 1 } } },
+        { $out: 'resultSize' },
       ])
       .exec();
   }
@@ -117,24 +128,12 @@ export class ProductService {
       .aggregate([
         {
           $lookup: {
-            from: 'variants',
+            from: 'categories',
             localField: 'category',
             foreignField: '_id',
             as: 'categoryName',
           },
         },
-        {
-          $lookup: {
-            from: 'variants',
-            localField: 'variants',
-            foreignField: '_id',
-            as: 'variantProduct',
-          },
-        },
-        { $match: { category: new Types.ObjectId(categoryId) } },
-        // {$unwind: "$stock"},
-        // { $group: { _id: '$sizes', count: { $sum:1 } } }
-        // {$out: "resultSize"}
       ])
       .exec();
   }

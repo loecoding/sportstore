@@ -32,15 +32,11 @@ import { RolesGuard } from '../auth/roles.guard';
 
 @Controller('product')
 export class ProductController {
-  constructor(
-    private readonly productService: ProductService,
-    private readonly orderService: OrderService,
-    private readonly customerService: CustomerService,
-  ) {}
+  constructor(private readonly productService: ProductService) {}
 
   @Post()
-  async addProduct(@Body() createProductDto: CreateProductDto) {
-    return await this.productService.addProduct(createProductDto);
+  async createProduct(@Body() createProductDto: CreateProductDto) {
+    return await this.productService.createProduct(createProductDto);
   }
 
   @Post('/variant/')
@@ -95,17 +91,6 @@ export class ProductController {
     return this.productService.deleteProduct(id);
   }
 
-  // @Put('/push/:id')
-  // insertProductSize(@Param('id') id: string, @Body() insertProductSize: insertSizeAndQuantityDto) {
-  //   // console.log(insertProductSize.size)
-  //   return this.productService.insertProductSize(id , insertProductSize.size);
-  // }
-
-  // @Delete('/delete/:categoryId')
-  // deleteProductQuantity(@Param('categoryId') categoryId: string ) {
-  //   return this.productService.deleteAllQuantityOfCategory(categoryId);
-  // }
-
   @Delete('/variant/')
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'delete variant succeeded.' })
@@ -125,12 +110,6 @@ export class ProductController {
 
   @Get('/variant/:categoryId')
   matchProductAndVariant(@Param('categoryId') categoryId: string) {
-    return this.productService.findProductAndVariant(categoryId);
+    return this.productService.matchProductAndVariant(categoryId);
   }
-
-  // @Put('/variant/:productId')
-  // insertVariantIdToArray(@Param('productId') productId: string, @Body('variantId') variantId: string) {
-  //   console.log(variantId)
-  //   return this.productService.insertVariantIdToArray(productId , variantId);
-  // }
 }

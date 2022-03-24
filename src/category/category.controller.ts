@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, Inject, forwardRef, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+  Inject,
+  forwardRef,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth-guard';
 import { Roles } from '../auth/roles.decorator';
@@ -12,18 +23,21 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('category')
 export class CategoryController {
-  constructor(private readonly categoryService: CategoryService
-    ,@Inject(forwardRef(() => CustomerService)) private readonly customerService: CustomerService
-    ,@Inject(forwardRef(() => ProductService)) private readonly productService: ProductService
-    ) {}
+  constructor(
+    private readonly categoryService: CategoryService,
+    @Inject(forwardRef(() => CustomerService))
+    private readonly customerService: CustomerService,
+    @Inject(forwardRef(() => ProductService))
+    private readonly productService: ProductService,
+  ) {}
 
   @Post()
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'add category succeeded.' })
-  @UseGuards(JwtAuthGuard , RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   addCategory(@Body() createCategory: CreateCategoryDto) {
-    console.log({createCategory})
+    console.log({ createCategory });
     return this.categoryService.addCategory(createCategory);
   }
 
@@ -34,43 +48,48 @@ export class CategoryController {
 
   @Get(':id')
   searchCategory(@Param('id') id: string) {
-    console.log(id)
+    console.log(id);
     return this.categoryService.searchCategory(id);
   }
 
   @Put('/update/:id')
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'add category succeeded.' })
-  @UseGuards(JwtAuthGuard , RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  updateCategory(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
-    console.log(id)
+  updateCategory(
+    @Param('id') id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ) {
+    console.log(id);
     return this.categoryService.updateCategory(id, updateCategoryDto);
   }
 
   @Delete('/delete/:id')
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'delete category succeeded.' })
-  @UseGuards(JwtAuthGuard , RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   deleteCategory(@Param('id') id: string) {
-    console.log(id)
+    console.log(id);
     return this.categoryService.deleteCategory(id);
   }
 
   @Get('/list/:categoryId')
-  showCategoryProduct(@Param('categoryId') categoryId: string){
-    return this.productService.showCategoryProduct(categoryId)
+  showCategoryProduct(@Param('categoryId') categoryId: string) {
+    return this.productService.showCategoryProduct(categoryId);
   }
 
   @Get('/list/:categoryId/:categoryId2')
-  showTwoCategoryProduct(@Param('categoryId') categoryId: string , @Param('categoryId2') categoryId2: string){
-    return this.productService.showTwoCategoryProduct(categoryId, categoryId2)
+  showTwoCategoryProduct(
+    @Param('categoryId') categoryId: string,
+    @Param('categoryId2') categoryId2: string,
+  ) {
+    return this.productService.showTwoCategoryProduct(categoryId, categoryId2);
   }
 
   @Get('/group/:categoryId')
-  groupProduct(@Param('categoryId') categoryId: string){
-    return this.productService.matchProduct(categoryId)
+  groupProduct(@Param('categoryId') categoryId: string) {
+    return this.productService.matchProduct(categoryId);
   }
-
 }
