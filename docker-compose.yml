@@ -4,6 +4,7 @@ services:
   mongo:
     image: mongo
     restart: always
+    container_name: mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
@@ -12,3 +13,9 @@ services:
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: root
+      MONGO_INITDB_DATABASE: example
+      MONGO_INITDB_USERNAME: loe
+      MONGO_INITDB_PASSWORD: 1234
+    volumes:
+      - ./init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+      - ./db:/data/db
